@@ -1,0 +1,52 @@
+kind: DaemonSet
+apiVersion: apps/v1
+metadata:
+  name: kube-ovn-speaker
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      app: kube-ovn-speaker
+  template:
+    metadata:
+      labels:
+        app: kube-ovn-speaker
+        component: network
+        type: infra
+    spec:
+      tolerations:
+        - operator: Exists
+          effect: NoSchedule
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app: kube-ovn-speaker
+              topologyKey: kubernetes.io/hostname
+      priorityClassName: system-cluster-critical
+      serviceAccountName: ovn
+      hostNetwork: true
+      containers:
+        - name: ovn-central
+          image: "yametech/kube-ovn:v1.7.1"
+          imagePullPolicy: IfNotPresent
+          command:
+            - /kube-ovn/kube-ovn-speaker
+          args:
+            - --graceful-restart=true
+            - --neighbor-address=172.16.128.162
+            - --neighbor-as=65002
+            - --cluster-as=65000
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          resources:
+            requests:
+              cpu: 500m
+              memory: 300Mi
+      nodeSelector:
+        kubernetes.io/os: "linux"
+        ovn.kubernetes.io/bgp: "true"

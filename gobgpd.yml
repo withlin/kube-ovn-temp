@@ -1,0 +1,29 @@
+global:
+    config:
+        as: 65002
+        router-id: 172.16.128.162
+neighbors:
+    - config:
+        neighbor-address: 172.16.128.160
+        peer-as: 65000
+      graceful-restart:
+        config:
+          enabled: true
+      afi-safis:
+        - config:
+            afi-safi-name: ipv4-unicast
+          mp-graceful-restart:
+            config:
+              enabled: true
+    - config:
+        neighbor-address: 172.16.128.161
+        peer-as: 65000
+      graceful-restart:
+        config:
+          enabled: true
+      afi-safis:
+        - config:
+            afi-safi-name: ipv4-unicast
+          mp-graceful-restart:
+             config:
+               enabled: true
